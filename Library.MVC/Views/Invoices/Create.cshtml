@@ -1,0 +1,49 @@
+﻿@model Library.MVC.ViewModels.CreateInvoiceViewModel
+
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<h1>Create Invoice</h1>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="InvoiceDate" class="form-label"></label>
+        <input asp-for="InvoiceDate" class="form-control" />
+        <span asp-validation-for="InvoiceDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CustomerId" class="form-label"></label>
+        <select asp-for="CustomerId" asp-items="Model.Customers" class="form-select">
+            <option value="">-- Select customer --</option>
+        </select>
+        <span asp-validation-for="CustomerId" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h4>Invoice Line</h4>
+
+    <div class="mb-3">
+        <label asp-for="ProductId" class="form-label"></label>
+        <select asp-for="ProductId" asp-items="Model.Products" class="form-select">
+            <option value="">-- Select product --</option>
+        </select>
+        <span asp-validation-for="ProductId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Quantity" class="form-label"></label>
+        <input asp-for="Quantity" class="form-control" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Invoice</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

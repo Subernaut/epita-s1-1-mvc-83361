@@ -1,0 +1,44 @@
+﻿@model Library.Domain.Invoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+    var total = Model.Lines.Sum(l => l.Quantity * l.UnitPrice);
+}
+
+<h1>Invoice Details</h1>
+
+<div class="mb-3">
+    <strong>Invoice Id:</strong> @Model.Id
+</div>
+<div class="mb-3">
+    <strong>Date:</strong> @Model.InvoiceDate.ToShortDateString()
+</div>
+<div class="mb-3">
+    <strong>Customer:</strong> @Model.Customer?.Name
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Line Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.Lines)
+        {
+            <tr>
+                <td>@line.Product?.Name</td>
+                <td>@line.Quantity</td>
+                <td>@line.UnitPrice.ToString("C")</td>
+                <td>@((line.Quantity * line.UnitPrice).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4>Total: @total.ToString("C")</h4>
+
+<a asp-action="Index" class="btn btn-secondary">Back</a>
