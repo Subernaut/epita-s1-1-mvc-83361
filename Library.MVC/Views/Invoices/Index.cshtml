@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Library.Domain.Invoice>
+
+@{
+    ViewData["Title"] = "Invoices";
+}
+
+<h1>Invoices</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create Invoice</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var invoice in Model)
+        {
+            var total = invoice.Lines.Sum(l => l.Quantity * l.UnitPrice);
+
+            <tr>
+                <td>@invoice.Id</td>
+                <td>@invoice.InvoiceDate.ToShortDateString()</td>
+                <td>@invoice.Customer?.Name</td>
+                <td>@total.ToString("C")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@invoice.Id" class="btn btn-sm btn-info">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
