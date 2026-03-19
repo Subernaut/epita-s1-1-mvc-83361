@@ -1,59 +1,64 @@
 ﻿@model IEnumerable<Library.Domain.Book>
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Books";
+    var categories = ViewBag.CategoryList as List<SelectListItem>;
+    var availability = ViewBag.AvailabilityList as List<SelectListItem>;
+    string currentSearch = ViewBag.CurrentSearch as string ?? "";
 }
 
-<h1>Index</h1>
+<h1>Books</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
-<table class="table">
+
+<form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <input type="text" name="searchString" value="@currentSearch" class="form-control" placeholder="Search by Title or Author" />
+        </div>
+        <div class="col-md-3">
+            <select name="categoryFilter" class="form-select" asp-items="categories">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="availabilityFilter" class="form-select" asp-items="availability"></select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Author)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Isbn)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsAvailable)
-            </th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Category</th>
+            <th>Availability</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Author)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Isbn)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsAvailable)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.Author</td>
+                <td>@book.Isbn</td>
+                <td>@book.Category</td>
+                <td>@(book.IsAvailable ? "Available" : "On Loan")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@book.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@book.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@book.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
