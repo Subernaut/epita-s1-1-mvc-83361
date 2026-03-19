@@ -41,3 +41,10 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await DbSeeder.SeedAsync(context);
+}
+

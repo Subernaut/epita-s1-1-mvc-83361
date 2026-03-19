@@ -10,22 +10,22 @@ using Library.MVC.Data;
 
 namespace Library.MVC.Controllers
 {
-    public class CustomersController : Controller
+    public class MembersController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public CustomersController(ApplicationDbContext context)
+        public MembersController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Customers
+        // GET: Members
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Customers.ToListAsync());
+            return View(await _context.Members.ToListAsync());
         }
 
-        // GET: Customers/Details/5
+        // GET: Members/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,39 +33,39 @@ namespace Library.MVC.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
+            var member = await _context.Members
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            if (member == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(member);
         }
 
-        // GET: Customers/Create
+        // GET: Members/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Customers/Create
+        // POST: Members/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Customer customer)
+        public async Task<IActionResult> Create([Bind("Id,FullName,Email,Phone")] Member member)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
+                _context.Add(member);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+            return View(member);
         }
 
-        // GET: Customers/Edit/5
+        // GET: Members/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -73,22 +73,22 @@ namespace Library.MVC.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            var member = await _context.Members.FindAsync(id);
+            if (member == null)
             {
                 return NotFound();
             }
-            return View(customer);
+            return View(member);
         }
 
-        // POST: Customers/Edit/5
+        // POST: Members/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Customer customer)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Email,Phone")] Member member)
         {
-            if (id != customer.Id)
+            if (id != member.Id)
             {
                 return NotFound();
             }
@@ -97,12 +97,12 @@ namespace Library.MVC.Controllers
             {
                 try
                 {
-                    _context.Update(customer);
+                    _context.Update(member);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomerExists(customer.Id))
+                    if (!MemberExists(member.Id))
                     {
                         return NotFound();
                     }
@@ -113,10 +113,10 @@ namespace Library.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+            return View(member);
         }
 
-        // GET: Customers/Delete/5
+        // GET: Members/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -124,34 +124,34 @@ namespace Library.MVC.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
+            var member = await _context.Members
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (customer == null)
+            if (member == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(member);
         }
 
-        // POST: Customers/Delete/5
+        // POST: Members/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
+            var member = await _context.Members.FindAsync(id);
+            if (member != null)
             {
-                _context.Customers.Remove(customer);
+                _context.Members.Remove(member);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id)
+        private bool MemberExists(int id)
         {
-            return _context.Customers.Any(e => e.Id == id);
+            return _context.Members.Any(e => e.Id == id);
         }
     }
 }

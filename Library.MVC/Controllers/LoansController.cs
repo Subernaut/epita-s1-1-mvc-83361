@@ -10,22 +10,23 @@ using Library.MVC.Data;
 
 namespace Library.MVC.Controllers
 {
-    public class ProductsController : Controller
+    public class LoansController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public ProductsController(ApplicationDbContext context)
+        public LoansController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Products
+        // GET: Loans
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            var applicationDbContext = _context.Loans.Include(l => l.Book).Include(l => l.Member);
+            return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Products/Details/5
+        // GET: Loans/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,39 +34,45 @@ namespace Library.MVC.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
+            var loan = await _context.Loans
+                .Include(l => l.Book)
+                .Include(l => l.Member)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
+            if (loan == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(loan);
         }
 
-        // GET: Products/Create
+        // GET: Loans/Create
         public IActionResult Create()
         {
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Author");
+            ViewData["MemberId"] = new SelectList(_context.Members, "Id", "Email");
             return View();
         }
 
-        // POST: Products/Create
+        // POST: Loans/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,UnitPrice")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,BookId,MemberId,LoanDate,DueDate,ReturnedDate")] Loan loan)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
+                _context.Add(loan);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Author", loan.BookId);
+            ViewData["MemberId"] = new SelectList(_context.Members, "Id", "Email", loan.MemberId);
+            return View(loan);
         }
 
-        // GET: Products/Edit/5
+        // GET: Loans/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -73,22 +80,24 @@ namespace Library.MVC.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var loan = await _context.Loans.FindAsync(id);
+            if (loan == null)
             {
                 return NotFound();
             }
-            return View(product);
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Author", loan.BookId);
+            ViewData["MemberId"] = new SelectList(_context.Members, "Id", "Email", loan.MemberId);
+            return View(loan);
         }
 
-        // POST: Products/Edit/5
+        // POST: Loans/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,UnitPrice")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BookId,MemberId,LoanDate,DueDate,ReturnedDate")] Loan loan)
         {
-            if (id != product.Id)
+            if (id != loan.Id)
             {
                 return NotFound();
             }
@@ -97,12 +106,12 @@ namespace Library.MVC.Controllers
             {
                 try
                 {
-                    _context.Update(product);
+                    _context.Update(loan);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
+                    if (!LoanExists(loan.Id))
                     {
                         return NotFound();
                     }
@@ -113,10 +122,12 @@ namespace Library.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            ViewData["BookId"] = new SelectList(_context.Books, "Id", "Author", loan.BookId);
+            ViewData["MemberId"] = new SelectList(_context.Members, "Id", "Email", loan.MemberId);
+            return View(loan);
         }
 
-        // GET: Products/Delete/5
+        // GET: Loans/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -124,34 +135,36 @@ namespace Library.MVC.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
+            var loan = await _context.Loans
+                .Include(l => l.Book)
+                .Include(l => l.Member)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
+            if (loan == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(loan);
         }
 
-        // POST: Products/Delete/5
+        // POST: Loans/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
+            var loan = await _context.Loans.FindAsync(id);
+            if (loan != null)
             {
-                _context.Products.Remove(product);
+                _context.Loans.Remove(loan);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        private bool LoanExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return _context.Loans.Any(e => e.Id == id);
         }
     }
 }
