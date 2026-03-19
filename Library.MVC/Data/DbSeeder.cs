@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Library.Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,37 @@ namespace Library.MVC.Data
 {
     public static class DbSeeder
     {
-        public static async Task SeedAsync(ApplicationDbContext context)
+        public static async Task SeedAsync(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
-            if (await context.Books.AnyAsync()) return; // Already seeded
+            // --- Identity: Admin Role + User ---
+            const string adminRole = "Admin";
+            const string adminEmail = "admin@library.com";
+            const string adminPassword = "Admin123!";
 
-            // --- 20 Books ---
+            if (!await roleManager.RoleExistsAsync(adminRole))
+            {
+                await roleManager.CreateAsync(new IdentityRole(adminRole));
+            }
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+                await userManager.CreateAsync(adminUser, adminPassword);
+                await userManager.AddToRoleAsync(adminUser, adminRole);
+            }
+            else if (!await userManager.IsInRoleAsync(adminUser, adminRole))
+            {
+                await userManager.AddToRoleAsync(adminUser, adminRole);
+            }
+
+            // --- Skip rest if already seeded ---
+            if (await context.Books.AnyAsync()) return;
+
+            // --- Books ---
             var bookFaker = new Faker<Book>()
                 .RuleFor(b => b.Title, f => f.Lorem.Sentence(3, 5))
                 .RuleFor(b => b.Author, f => f.Person.FullName)
@@ -25,7 +52,7 @@ namespace Library.MVC.Data
             var books = bookFaker.Generate(20);
             await context.Books.AddRangeAsync(books);
 
-            // --- 10 Members ---
+            // --- Members ---
             var memberFaker = new Faker<Member>()
                 .RuleFor(m => m.FullName, f => f.Person.FullName)
                 .RuleFor(m => m.Email, f => f.Internet.Email())
@@ -33,20 +60,17 @@ namespace Library.MVC.Data
 
             var members = memberFaker.Generate(10);
             await context.Members.AddRangeAsync(members);
-
             await context.SaveChangesAsync();
 
-            // --- 15 Loans ---
+            // --- Loans ---
             var loans = new List<Loan>();
             var rnd = new Random();
-
             var availableBooks = books.ToList();
 
-            // Helper to get random member and book
             Book PickBook() => availableBooks[rnd.Next(availableBooks.Count)];
             Member PickMember() => members[rnd.Next(members.Count)];
 
-            // 5 Active loans
+            // 5 Active
             for (int i = 0; i < 5; i++)
             {
                 var book = PickBook();
@@ -63,7 +87,7 @@ namespace Library.MVC.Data
                 book.IsAvailable = false;
             }
 
-            // 5 Returned loans
+            // 5 Returned
             for (int i = 0; i < 5; i++)
             {
                 var book = PickBook();
@@ -81,7 +105,7 @@ namespace Library.MVC.Data
                 book.IsAvailable = true;
             }
 
-            // 5 Overdue loans
+            // 5 Overdue
             for (int i = 0; i < 5; i++)
             {
                 var book = PickBook();
